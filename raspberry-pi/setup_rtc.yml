@@ -1,0 +1,42 @@
+---
+### Setup hardware RTC on i2c bus
+### http://m8051.blogspot.com/2014/11/raspberry-pi-i2c-interfacing-with.html
+- hosts: raspberry-pi
+  tags: [ rtc ]
+  tasks:
+
+      - name: Install i2c tools and support libs
+        apt: pkg={{ item }} state=installed
+        with_items: [ i2c-tools ]
+        sudo: true
+
+      - name: Remove bcm2708 module from blacklist
+        lineinfile:
+          state: absent
+          line: "blacklist i2c-bcm2708"
+          dest: /etc/modprobe.d/raspi-blacklist.conf
+        sudo: true
+
+      - name: Enable bcm2708 module
+        lineinfile:
+            state: present
+            line: "i2c-dev"
+            dest: /etc/modules
+        sudo: true
+
+      - name: Enable i2c override
+        tags: [ i2c-override ]
+        lineinfile:
+            backrefs: yes
+            dest: /boot/cmdline.txt
+            regexp: "^(root\\s*=)(.*)( bcm2708\\.vc_i2c_override=1)?(.*)?$"
+            line: '\1\2 bcm2708.vc_i2c_override=1\4'
+            #backup: true
+        sudo: true
+
+      - name: Add i2c user to group
+        user: state=present name={{ item }} groups=i2c append=yes
+        with_items:
+            - pi
+            - "{{ ansible_ssh_user }}"
+        sudo: true

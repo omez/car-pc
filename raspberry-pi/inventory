@@ -1,0 +1,2 @@
+[raspberry-pi]
+192.168.1.34 ansible_ssh_user=osmc ansible_ssh_pass=osmc become_method=sudo

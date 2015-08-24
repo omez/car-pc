@@ -1,0 +1,40 @@
+---
+    - hosts: all
+
+      handlers:
+          - name: reboot
+            shell: reboot
+            sudo: true
+
+      tasks:
+
+          ## Setup BOOT options
+          - name: Put boot options
+            lineinfile:
+                dest: /boot/config.txt
+                line: "{{ item.key }}={{ item.value }}"
+                regexp: '^({{ item.key }})=(.*)$'
+            with_dict:
+                boot_delay: 0     # no boot delay
+                boot_delay_ms: 0  # no boot delay
+                disable_splash: 1 # no splash
+            sudo: true
+            notify: reboot
+
+
+
+          ## Put HDMI configuration
+          - name: Put HDMI configuration
+            lineinfile:
+                dest: /boot/config.txt
+                line: "{{ item.key }}={{ item.value }}"
+                regexp: '^({{ item.key }})=(.*)$'
+            with_dict:
+                hdmi_drive: 1    ## 1 - no sound, 2 - with sound
+                hdmi_group: 2    ## 1 - CEA, 2 - DMT (Display monitor)
+                hdmi_mode: 87    ## 87 - create new mode
+                hdmi_cvt: "1024 600 60 6"  ## 1024x600x60Hz 15:9
+            sudo: true
+            notify: reboot
+
+

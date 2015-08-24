@@ -1,0 +1,7 @@
+---
+### Setup hardware RTC on i2c bus
+###
+### Theme: eminence
+- hosts: raspberry-pi
+  tags: [ kodi ]
+  tasks:

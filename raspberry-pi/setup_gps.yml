@@ -1,0 +1,42 @@
+---
+
+    - hosts: raspberry-pi
+
+
+      tasks:
+
+          ## Setup from
+          ## http://raspberrypi.ru/blog/readblog/515.html
+
+          - name: Remove default serial port configuration
+            lineinfile:
+                state: absent
+                line: "T0:23:respawn:/sbin/getty -L ttyAMA0 115200 vt100"
+                dest: /etc/inittab
+            sudo: true
+
+          - name: Put tty config
+            replace:
+                dest: /etc/cmdline.txt
+                regexp: "console=ttyAMA0,115200"
+                replace: "console=tty1"
+            sudo: true
+
+          - name: Setup PORT speed
+            command: stty -F 9600 /dev/ttyAMA0
+            sudo: true
+
+
+          ## Install/run GPS daemon
+          - name: Ensure gpsd installed
+            apt: pkg=gpsd state=latest
+            sudo: true
+
+          - name: Start gpsd service
+            command: gpsd /dev/ttyAMA0
+            sudo: true
+
+
+          ## Install NAVIT
+          - name: Ensure navit installed
+            apt: pkg=navit state=latest
